@@ -31,6 +31,16 @@ def load_model(model_path):
         input_standardizer: Tuple of (mu, sd) for input normalization
         device: PyTorch device
     """
+    # Set seeds for deterministic behavior (ensures lazy initialization is consistent)
+    import random
+    torch.manual_seed(42)
+    torch.cuda.manual_seed_all(42)
+    np.random.seed(42)
+    random.seed(42)
+    if torch.cuda.is_available():
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+    
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Loading model from: {model_path}")
     print(f"Using device: {device}")
@@ -74,9 +84,6 @@ def load_model(model_path):
         **head_kwargs
     )
     
-    # Load state dict
-    model.load_state_dict(state_dict, strict=False)
-    
     # Get input standardizer
     if 'mu' in input_std and 'sd' in input_std:
         mu = input_std['mu']
@@ -86,8 +93,26 @@ def load_model(model_path):
         mu = np.zeros((1, 1, 6), dtype=np.float32)
         sd = np.ones((1, 1, 6), dtype=np.float32)
     
+    # Move model to device FIRST
     model.to(device)
     model.eval()
+    
+    # Force initialization of lazy components with a dummy forward pass
+    # This ensures all layers exist before loading weights
+    print("Initializing model layers...")
+    with torch.no_grad():
+        Tp = int(backbone_cfg["data"]["past_len"])  # 150 frames for 5 sec at 30 fps
+        D_in = int(backbone_cfg["model"]["D_in"])    # 6 gaze dimensions
+        dummy_input = torch.zeros(1, Tp, D_in, dtype=torch.float32).to(device)
+        _ = model(dummy_input)
+    
+    # Now load the trained weights (will overwrite the random lazy initialization)
+    print("Loading trained weights...")
+    missing = model.load_state_dict(state_dict, strict=False)
+    if missing.missing_keys:
+        print(f"Missing keys: {missing.missing_keys}")
+    if missing.unexpected_keys:
+        print(f"Unexpected keys: {missing.unexpected_keys}")
     
     return model, (mu, sd), device
 

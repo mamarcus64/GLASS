@@ -1,26 +1,26 @@
 {
-  "timestamp": "2025-09-06_17-17-46",
-  "data_folder": "/data2/mjma/voices/emotion_prediction/data/5.0_seconds/seed_123",
+  "timestamp": "2025-11-26_21-23-43",
+  "data_folder": "emotion_prediction/data/5.0_seconds/seed_123",
   "detailed_results": [
     {
       "model": "GLASS_FINETUNE",
-      "timestamp": "2025-09-06_17-17-46",
-      "mse_avg": 0.028107324615120888,
-      "mae_avg": 0.12161900848150253,
-      "r2_avg": -0.4734269380569458,
-      "pearson_avg": 0.22441275417804718,
-      "mse_valence": 0.026486359536647797,
-      "mse_arousal": 0.03527134656906128,
-      "mse_dominance": 0.022564269602298737,
-      "mae_valence": 0.1097998097538948,
-      "mae_arousal": 0.15320418775081635,
-      "mae_dominance": 0.10185301303863525,
-      "r2_valence": -0.45530474185943604,
-      "r2_arousal": -0.2476212978363037,
-      "r2_dominance": -0.7173547744750977,
-      "pearson_valence": 0.3031977713108063,
-      "pearson_arousal": 0.05769602209329605,
-      "pearson_dominance": 0.3123445212841034,
+      "timestamp": "2025-11-26_21-23-43",
+      "mse_avg": 0.027552098035812378,
+      "mae_avg": 0.12042539566755295,
+      "r2_avg": -0.4412040710449219,
+      "pearson_avg": 0.23406898975372314,
+      "mse_valence": 0.02593640238046646,
+      "mse_arousal": 0.03481803834438324,
+      "mse_dominance": 0.021901849657297134,
+      "mae_valence": 0.10860110074281693,
+      "mae_arousal": 0.15246528387069702,
+      "mae_dominance": 0.1002098098397255,
+      "r2_valence": -0.4250870943069458,
+      "r2_arousal": -0.23158681392669678,
+      "r2_dominance": -0.666938304901123,
+      "pearson_valence": 0.31527769565582275,
+      "pearson_arousal": 0.06182275712490082,
+      "pearson_dominance": 0.32510650157928467,
       "epochs": 15,
       "batch_size": 128,
       "weight_decay": 0.09,
@@ -39,10 +39,10 @@
   "summary": [
     {
       "model": "GLASS_FINETUNE",
-      "mse_avg": 0.028107324615120888,
-      "mae_avg": 0.12161900848150253,
-      "r2_avg": -0.4734269380569458,
-      "pearson_avg": 0.22441275417804718
+      "mse_avg": 0.027552098035812378,
+      "mae_avg": 0.12042539566755295,
+      "r2_avg": -0.4412040710449219,
+      "pearson_avg": 0.23406898975372314
     }
   ]
 }
