@@ -1,0 +1,33 @@
+# GLASS: Gaze-based Learning for Affective State Sensing
+# Requirements for inference and training
+
+# Core dependencies
+torch>=2.2.0
+numpy>=1.23.0
+pandas>=2.0.0
+pyyaml>=6.0.0
+tqdm>=4.66.0
+
+# Self-supervised gaze training
+tensorboard>=2.13.0
+
+# Visualization
+opencv-python>=4.8.0
+matplotlib>=3.7.0
+
+# Scientific computing
+scikit-learn>=1.3.0
+scipy>=1.11.0
+
+# ============================================================
+# Optional dependencies (install separately if needed)
+# ============================================================
+# 
+# Batch processing:
+#   pip install threadward
+#
+# PyFeat (alternative to OpenFace, not recommended):
+#   pip install py-feat
+#   Note: Has complex dependencies and build requirements.
+#   OpenFace is the recommended approach.
+

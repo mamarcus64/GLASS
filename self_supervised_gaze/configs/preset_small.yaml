@@ -1,0 +1,68 @@
+data:
+  raw_dir: /data2/mjma/voices/self_supervised_gaze/gaze_raw
+  norm_dir: /data2/mjma/voices/self_supervised_gaze/gaze_norm
+  use_norm: false
+  past_len: 150
+  future_len: 150
+  stride: 151
+  min_valid_ratio: 0.7
+  zero_eps: 1e-8
+  repetitive_num_sampled: 5
+  repetitive_fraction: 0.8
+  channels: null
+  val_split: 0.05
+  split_seed: 42
+  shuffle_videos: true
+  shuffle_seed: 42
+  max_resample_attempts: 50
+
+model:
+  patch_size: 5         # 150 -> 30 tokens
+  D_in: 6               # set to your channel count if different
+  d_model: 256
+  n_heads: 4
+  enc_layers: 6
+  dec_layers: 4
+  mlp_ratio: 4.0
+  dropout: 0.05
+  attn_dropout: 0.0
+  pos_enc: rope      # "rope" or "learned"
+  norm: preln           # "preln" or "postln"
+  share_patch_embed: true
+  attention_variant: vanilla
+  out_mode: linear_to_PxD
+
+loss:
+  coord: huber          # "huber" or "smoothl1"
+  velocity_weight: 0.2
+  tv_weight: 0.0
+  clamp_outputs: false  # optionally clamp outputs to a range
+
+optim:
+  optimizer: adamw
+  lr: 0.0003
+  betas: [0.9, 0.95]
+  weight_decay: 0.0001
+  scheduler: cosine
+  warmup_steps: 3000
+  max_steps: -1
+  batch_size: 256
+  amp: true
+  grad_clip: 1.0
+  seed: 1337
+  sched_sampling:
+    enabled: true           # turn scheduled sampling on/off
+    start_step: 0           # when to start annealing
+    end_fraction: 0.6       # reach full AR by 60% of total training steps
+    end_step: null          # OR set an absolute step; overrides end_fraction if set
+    min_tf_prob: 0.0        # floor for TF prob after end (usually 0.0)
+    stop_grad_pred_embed: true  # detach predicted frames before re-embedding
+
+logging:
+  run_name: small_5_sec_5_sec
+  log_dir: /data2/mjma/voices/self_supervised_gaze/runs
+  checkpoint_dir: /data2/mjma/voices/self_supervised_gaze/checkpoints
+  save_every: 1
+  num_workers: 4
+  data_parallel: true
+  validate_every_steps: 150

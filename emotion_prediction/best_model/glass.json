@@ -1,0 +1,48 @@
+{
+  "timestamp": "2025-09-06_17-17-46",
+  "data_folder": "/data2/mjma/voices/emotion_prediction/data/5.0_seconds/seed_123",
+  "detailed_results": [
+    {
+      "model": "GLASS_FINETUNE",
+      "timestamp": "2025-09-06_17-17-46",
+      "mse_avg": 0.028107324615120888,
+      "mae_avg": 0.12161900848150253,
+      "r2_avg": -0.4734269380569458,
+      "pearson_avg": 0.22441275417804718,
+      "mse_valence": 0.026486359536647797,
+      "mse_arousal": 0.03527134656906128,
+      "mse_dominance": 0.022564269602298737,
+      "mae_valence": 0.1097998097538948,
+      "mae_arousal": 0.15320418775081635,
+      "mae_dominance": 0.10185301303863525,
+      "r2_valence": -0.45530474185943604,
+      "r2_arousal": -0.2476212978363037,
+      "r2_dominance": -0.7173547744750977,
+      "pearson_valence": 0.3031977713108063,
+      "pearson_arousal": 0.05769602209329605,
+      "pearson_dominance": 0.3123445212841034,
+      "epochs": 15,
+      "batch_size": 128,
+      "weight_decay": 0.09,
+      "head_first_epochs": 0,
+      "head_lr": 0.001,
+      "finetune_lr": 0.0001,
+      "head_dropout": 0.15,
+      "loss_type": "mse_r",
+      "alpha": 0.1,
+      "chunk_splits_seconds": [
+        1.0
+      ],
+      "frac_encoders_unfrozen": 1.0
+    }
+  ],
+  "summary": [
+    {
+      "model": "GLASS_FINETUNE",
+      "mse_avg": 0.028107324615120888,
+      "mae_avg": 0.12161900848150253,
+      "r2_avg": -0.4734269380569458,
+      "pearson_avg": 0.22441275417804718
+    }
+  ]
+}

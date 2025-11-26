@@ -1,0 +1,97 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Data and results (keep structure, ignore content)
+data/
+data_*/
+results/
+threadward_results/
+checkpoints/
+runs/
+runs_copy/
+
+# Processed data
+*.npy
+*.npz
+gaze_raw/
+gaze_norm/
+frames/
+index.csv
+
+# Video files
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.flv
+*.wmv
+
+# OpenFace results
+openface_results/
+results/
+
+# Temporary files
+*.log
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Model checkpoints (except best_model)
+*.ckpt
+!emotion_prediction/best_model/model.ckpt
+
+# TensorBoard logs
+events.out.tfevents.*
+
+# Test outputs
+test_*.csv
+test_*.mp4
+test_*.png
+test_*.jpg
+
+# OS-specific
+Thumbs.db
+*.DS_Store
+
+# Conda
+*.tar.bz2
+
