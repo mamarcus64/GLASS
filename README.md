@@ -2,6 +2,16 @@
 
 This repository contains the official implementation for emotion prediction from eye gaze patterns using self-supervised learning. The model predicts continuous Valence, Arousal, and Dominance (VAD) dimensions from eye movement data extracted via OpenFace.
 
+## Demo
+
+<p align="center">
+  <img src="assets/happy_example.gif" alt="Positive Valence" width="250"/>
+  <img src="assets/sad_example.gif" alt="Negative Valence" width="250"/>
+</p>
+<p align="center">
+  <em>High valence example &nbsp;|&nbsp; Low valence example</em>
+</p>
+
 ## Quick Start: Inference
 
 ### Prerequisites

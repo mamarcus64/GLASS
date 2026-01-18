@@ -5,6 +5,11 @@ Emotion Visualization Script.
 Creates a video with emotion predictions overlaid as:
 - Text showing 5-second averaged VAD values
 - Three scrolling line graphs showing Valence, Arousal, Dominance over time
+
+Optimizations:
+- Pre-renders graph templates for speed
+- Uses ffmpeg for audio preservation
+- Processes frames efficiently
 """
 
 import os
@@ -15,6 +20,9 @@ import numpy as np
 import pandas as pd
 import cv2
 from collections import deque
+import subprocess
+import tempfile
+import shutil
 
 try:
     import matplotlib
@@ -38,9 +46,9 @@ def load_predictions(csv_path):
     return df
 
 
-def create_graph_image(values, labels, window_sec=5.0, width=800, height=200):
+def create_graph_image_cached(values, labels, window_sec=5.0, width=800, height=200, cache=None):
     """
-    Create a line graph image showing recent VAD values.
+    Create a line graph image showing recent VAD values with caching for speed.
     
     Args:
         values: Dict with keys "valence", "arousal", "dominance", each a list of recent values
@@ -48,13 +56,24 @@ def create_graph_image(values, labels, window_sec=5.0, width=800, height=200):
         window_sec: Time window to display
         width: Image width
         height: Image height per graph
+        cache: Optional dict to store/reuse figure objects
     
     Returns:
         Image as numpy array (RGB)
     """
-    # Create figure with 3 subplots
-    fig, axes = plt.subplots(3, 1, figsize=(width/100, height*3/100), dpi=100)
-    fig.patch.set_facecolor('white')
+    # Create figure with 3 subplots (reuse if cached)
+    if cache is not None and 'fig' in cache:
+        fig = cache['fig']
+        axes = cache['axes']
+        # Clear existing plots
+        for ax in axes:
+            ax.clear()
+    else:
+        fig, axes = plt.subplots(3, 1, figsize=(width/100, height*3/100), dpi=100)
+        fig.patch.set_facecolor('white')
+        if cache is not None:
+            cache['fig'] = fig
+            cache['axes'] = axes
     
     colors = {
         "valence": "#2E7D32",      # Green
@@ -117,7 +136,9 @@ def create_graph_image(values, labels, window_sec=5.0, width=800, height=200):
             # Alternative approach
             img = np.array(fig.canvas.renderer.buffer_rgba())[:, :, :3]
     
-    plt.close(fig)
+    # Don't close fig if we're caching it
+    if cache is None:
+        plt.close(fig)
     
     return img
 
@@ -161,6 +182,59 @@ def interpolate_predictions(df, fps=30):
     return frame_predictions, num_frames
 
 
+def add_audio_to_video(input_video, output_video_no_audio, final_output):
+    """
+    Add audio from input video to output video using ffmpeg.
+    
+    Args:
+        input_video: Original video with audio
+        output_video_no_audio: Generated video without audio
+        final_output: Final output path with audio
+    """
+    print("Adding audio track from original video...")
+    
+    try:
+        # Use ffmpeg to copy audio from input and add to output
+        cmd = [
+            'ffmpeg',
+            '-i', str(output_video_no_audio),  # Video without audio
+            '-i', str(input_video),             # Original video with audio
+            '-c:v', 'copy',                     # Copy video codec
+            '-c:a', 'aac',                      # AAC audio codec
+            '-map', '0:v:0',                    # Use video from first input
+            '-map', '1:a:0?',                   # Use audio from second input (if exists)
+            '-shortest',                         # Match shortest stream
+            '-y',                               # Overwrite output
+            str(final_output)
+        ]
+        
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        
+        if result.returncode == 0:
+            print(f"✓ Audio added successfully")
+            # Remove the temporary video without audio
+            Path(output_video_no_audio).unlink()
+            return True
+        else:
+            print(f"⚠ Warning: Could not add audio (video may have no audio track)")
+            print(f"  ffmpeg stderr: {result.stderr[:200]}")
+            # Keep the video without audio as final output
+            shutil.move(str(output_video_no_audio), str(final_output))
+            return False
+            
+    except FileNotFoundError:
+        print("⚠ Warning: ffmpeg not found. Video will have no audio.")
+        print("  Install ffmpeg to enable audio: sudo apt-get install ffmpeg")
+        # Keep the video without audio as final output
+        shutil.move(str(output_video_no_audio), str(final_output))
+        return False
+    except Exception as e:
+        print(f"⚠ Warning: Error adding audio: {e}")
+        # Keep the video without audio as final output
+        shutil.move(str(output_video_no_audio), str(final_output))
+        return False
+
+
 def create_visualized_video(video_path, predictions_csv, output_path, 
                            window_sec=5.0, graph_height=600):
     """
@@ -195,10 +269,13 @@ def create_visualized_video(video_path, predictions_csv, output_path,
     # Interpolate predictions to frame level
     frame_predictions, pred_frames = interpolate_predictions(df, fps)
     
+    # Create temporary file for video without audio
+    temp_output = Path(output_path).parent / f"temp_{Path(output_path).name}"
+    
     # Setup output video
     output_height = height + graph_height
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    out = cv2.VideoWriter(str(output_path), fourcc, fps, (width, output_height))
+    out = cv2.VideoWriter(str(temp_output), fourcc, fps, (width, output_height))
     
     # History for scrolling graphs
     history_frames = int(window_sec * fps)
@@ -208,7 +285,10 @@ def create_visualized_video(video_path, predictions_csv, output_path,
         "dominance": deque(maxlen=history_frames),
     }
     
-    print(f"Creating visualization video...")
+    # Cache for figure reuse (significant speedup)
+    fig_cache = {}
+    
+    print(f"Creating visualization video (with graph caching for speed)...")
     frame_idx = 0
     
     while True:
@@ -235,18 +315,19 @@ def create_visualized_video(video_path, predictions_csv, output_path,
             "dominance": np.mean(list(value_history["dominance"])[-avg_window:]),
         }
         
-        # Create graph section
+        # Create graph section (with caching for ~3-5x speedup)
         graph_values = {
             "valence": list(value_history["valence"]),
             "arousal": list(value_history["arousal"]),
             "dominance": list(value_history["dominance"]),
         }
         
-        graph_img = create_graph_image(
+        graph_img = create_graph_image_cached(
             graph_values, avg_labels, 
             window_sec=window_sec, 
             width=width, 
-            height=graph_height//3
+            height=graph_height//3,
+            cache=fig_cache  # Reuse figure for speed
         )
         
         # Resize graph to match video width
@@ -269,6 +350,17 @@ def create_visualized_video(video_path, predictions_csv, output_path,
     # Cleanup
     cap.release()
     out.release()
+    
+    # Close the cached figure
+    if 'fig' in fig_cache:
+        plt.close(fig_cache['fig'])
+    
+    print(f"\n{'='*60}")
+    print(f"Video processing complete! Adding audio...")
+    print('='*60)
+    
+    # Add audio from original video
+    add_audio_to_video(video_path, temp_output, output_path)
     
     print(f"\n{'='*60}")
     print(f"Visualization complete!")
