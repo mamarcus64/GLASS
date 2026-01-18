@@ -1,6 +1,6 @@
 # GLASS: Gaze-based Learning for Affective State Sensing
 
-This repository contains the official implementation for emotion prediction from eye gaze patterns using self-supervised learning. The model predicts continuous Valence, Arousal, and Dominance (VAD) dimensions from eye movement data extracted via OpenFace.
+This repository contains the official implementation for emotion prediction from eye gaze patterns using self-supervised learning for the ICASSP 2026 paper, "ENCODING EMOTION THROUGH SELF-SUPERVISED EYE MOVEMENT RECONSTRUCTION". The model predicts continuous Valence, Arousal, and Dominance (VAD) dimensions from eye movement data extracted via OpenFace.
 
 ## Demo
 
